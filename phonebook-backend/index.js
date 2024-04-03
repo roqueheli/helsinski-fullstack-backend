@@ -31,6 +31,16 @@ app.get('/api/persons/', (rq, rs) => {
     rs.json(persons)
 })
 
+//get one person
+app.get('/api/persons/:id', (rq, rs) => {
+  const person = persons.find(person => person.id === Number(rq.params.id))
+  if (person) {
+      rs.json(person)
+  } else {
+      rs.status(404).end().send('resource not found')
+  }
+})
+
 //get info
 app.get('/info', (rq, rs) => {
   const qtyPeople = persons.length
