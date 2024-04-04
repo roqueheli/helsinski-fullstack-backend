@@ -3,7 +3,7 @@ const app = express()
 
 app.use(express.json())
 
-const persons = [
+let persons = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -46,6 +46,13 @@ app.get('/info', (rq, rs) => {
   const qtyPeople = persons.length
   const timeRq = new Date()
   rs.send(`<p>Phonebook has info for ${qtyPeople} people</p><p>${timeRq}</p>`)
+})
+
+//deleting a note
+app.delete('/api/persons/:id', (rq, rs) => {
+  const id = Number(rq.params.id)
+  persons = persons.filter(person => person.id !== id)
+  rs.status(204).send(persons)
 })
 
 
