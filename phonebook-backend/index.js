@@ -62,6 +62,20 @@ app.delete('/api/persons/:id', (rq, rs) => {
 //add a new person
 app.post('/api/persons', (rq, rs) => {
   const body = rq.body
+
+  const findPerson = persons.find((person) => person.name === body.name)
+  console.log(findPerson);
+  if (findPerson) {
+    return rs.status(400).json({
+      error: 'name must be unique'
+    })
+  }
+
+  if (!body.name) {
+    return rs.status(400).json({ 
+      error: 'name missing' 
+    })
+  }
   
   const person = {
       name: body.name,
