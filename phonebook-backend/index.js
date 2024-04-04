@@ -26,6 +26,10 @@ let persons = [
     }
 ]
 
+const generateId = () => {
+  return Math.random().toString(36)
+}
+
 //get all persons
 app.get('/api/persons/', (rq, rs) => {
     rs.json(persons)
@@ -48,11 +52,26 @@ app.get('/info', (rq, rs) => {
   rs.send(`<p>Phonebook has info for ${qtyPeople} people</p><p>${timeRq}</p>`)
 })
 
-//deleting a note
+//deleting a person
 app.delete('/api/persons/:id', (rq, rs) => {
   const id = Number(rq.params.id)
   persons = persons.filter(person => person.id !== id)
   rs.status(204).send(persons)
+})
+
+//add a new person
+app.post('/api/persons', (rq, rs) => {
+  const body = rq.body
+  
+  const person = {
+      name: body.name,
+      number: body.number,
+      id: generateId(),
+  }
+
+  persons = persons.concat(person)
+
+  rs.json(person)
 })
 
 
