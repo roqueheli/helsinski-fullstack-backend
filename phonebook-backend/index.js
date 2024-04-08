@@ -1,6 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
+
 const app = express()
+
+app.use(cors())
 
 morgan.token('body', (rq, rs) => {
   if (rq.method === 'POST') {
@@ -10,6 +14,8 @@ morgan.token('body', (rq, rs) => {
 
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+app.use(express.static('dist'))
 
 let persons = [
     { 
@@ -63,8 +69,20 @@ app.get('/info', (rq, rs) => {
 //deleting a person
 app.delete('/api/persons/:id', (rq, rs) => {
   const id = Number(rq.params.id)
-  persons = persons.filter(person => person.id !== id)
-  rs.status(204).send(persons)
+
+  const findPerson = persons.find((person) => person.id === id || person.id === rq.params.id)
+  
+  if (!findPerson) {
+    return rs.status(204)
+  } else {
+    id
+    ?
+      persons = persons.filter((person) => person.id !== id)
+    :
+      persons = persons.filter((person) => person.id !== rq.params.id)
+  }
+  
+  rs.json(findPerson)
 })
 
 //add a new person
@@ -72,19 +90,18 @@ app.post('/api/persons', (rq, rs) => {
   const body = rq.body
 
   const findPerson = persons.find((person) => person.name === body.name)
-  console.log(findPerson);
   if (findPerson) {
     return rs.status(400).json({
       error: 'name must be unique'
     })
   }
 
-  if (!body.name) {
+  if (!body.name || !body.number) {
     return rs.status(400).json({ 
-      error: 'name missing' 
+      error: 'name or number is missing' 
     })
   }
-  
+
   const person = {
       name: body.name,
       number: body.number,
@@ -96,7 +113,7 @@ app.post('/api/persons', (rq, rs) => {
   rs.json(person)
 })
 
-const PORT = 3002
+const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
