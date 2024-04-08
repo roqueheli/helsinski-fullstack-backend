@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf dist && cd ../../Helsinski-Fullstack/part2/phonebook/ && npm run build && cp -r dist ../../../Helsinski-backend/phonebook-backend/",
     "deploy": "fly deploy",
-    "deploy:full": "npm run build:ui && npm run deploy",    
+    "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "fly logs"
   },
   "repository": {
@@ -28,6 +28,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "mongoose": "^7.6.3",
     "morgan": "^1.10.0"
   }
 }
