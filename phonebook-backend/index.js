@@ -2,17 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-const { count } = require('console')
-
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } 
-
-  next(error)
-}
+const errorHandler = require('./src/middlewares/errorHandler')
 
 const unknownEndpoint = (rq, rs) => {
   rs.status(404).send({ error: 'unknown endpoint' })
@@ -68,8 +58,9 @@ app.delete('/api/persons/:id', (rq, rs, next) => {
 
 //updating a number
 app.put('/api/persons/:id', (rq, rs, next) => {
+  const { id, body } = rq
   Person
-  .findByIdAndUpdate( rq.params.id, rq.body, { new: true })
+  .findByIdAndUpdate( id, body, { new: true, runValidators: true, context: 'query' })
   .then((person) => {
     rs.json(person)
   })
@@ -80,7 +71,7 @@ app.put('/api/persons/:id', (rq, rs, next) => {
 app.post('/api/persons', (rq, rs, next) => {
   const body = rq.body
 
-  if (!body.name || !body.number) {
+  if (!body.name || !body.number || body.name === undefined || body.number === undefined) {
     return rs.status(400).json({ 
       error: 'name or number is missing' 
     })
