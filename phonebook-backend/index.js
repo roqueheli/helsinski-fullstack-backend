@@ -2,6 +2,21 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const { count } = require('console')
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+const unknownEndpoint = (rq, rs) => {
+  rs.status(404).send({ error: 'unknown endpoint' })
+}
 
 const app = express()
 
@@ -19,44 +34,50 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 app.use(express.static('dist'))
 
 //get all persons
-app.get('/api/persons/', (rq, rs) => {
-  Person.find({}).then(people => {
-    rs.json(people)
-  })
+app.get('/api/persons/', (rq, rs, next) => {
+  Person.find({})
+  .then(people => rs.json(people))
+  .catch(err => next(err))
 })
 
 //get one person
-app.get('/api/persons/:id', (rq, rs) => {
+app.get('/api/persons/:id', (rq, rs, next) => {
   Person
   .findById(rq.params.id)
-  .then(person => rs.json(person))
-  .catch(err => rs.status(404).end().send('resource not found'))
+  .then((person) => {
+    person ? rs.json(person) : rs.status(404).end()
+  })
+  .catch(err => next(err))
 })
 
 //get info
 app.get('/info', (rq, rs) => {
-  const qtyPeople = persons.length
-  const timeRq = new Date()
-  rs.send(`<p>Phonebook has info for ${qtyPeople} people</p><p>${timeRq}</p>`)
+  Person.count({}).then(count => {
+    const timeRq = new Date()
+    rs.send(`<p>Phonebook has info for ${count} people</p><p>${timeRq}</p>`)
+  });
 })
 
 //deleting a person
-app.delete('/api/persons/:id', (rq, rs) => {
-  Person.findOneAndRemove({ _id: rq.params.id }).then((person) => rs.json(person))
+app.delete('/api/persons/:id', (rq, rs, next) => {
+  Person
+  .findByIdAndDelete({ _id: rq.params.id })
+  .then((person) => rs.json(person))
+  .catch(err => next(err))
 })
 
 //updating a number
-app.put('/api/persons/:id', (rq, rs) => {
+app.put('/api/persons/:id', (rq, rs, next) => {
   Person
-  .findOneAndUpdate( { _id: rq.params.id }, { number: rq.body.number }, { returnOriginal: false })
+  .findByIdAndUpdate( rq.params.id, rq.body, { new: true })
   .then((person) => {
     rs.json(person)
   })
-  .catch(err => console.log(err))
+  .catch(err => next(err))
 })
 
 //add a new person
-app.post('/api/persons', (rq, rs) => {
+app.post('/api/persons', (rq, rs, next) => {
   const body = rq.body
 
   if (!body.name || !body.number) {
@@ -70,10 +91,14 @@ app.post('/api/persons', (rq, rs) => {
     number: body.number,
   })
 
-  person.save().then(savedPerson => {
-    rs.json(savedPerson)
-  })
+  person.save()
+  .then(savedPerson => rs.json(savedPerson))
+  .catch(err => next(err))
 })
+
+app.use(unknownEndpoint)
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {
