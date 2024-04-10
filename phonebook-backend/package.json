@@ -10,7 +10,8 @@
     "build:ui": "rm -rf dist && cd ../../Helsinski-Fullstack/part2/phonebook/ && npm run build && cp -r dist ../../../Helsinski-backend/phonebook-backend/",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,18 @@
   },
   "homepage": "https://github.com/roqueheli/helsinski-fullstack-backend#readme",
   "devDependencies": {
+    "@eslint/eslintrc": "^3.0.2",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "globals": "^15.0.0",
     "nodemon": "^3.1.0"
   },
   "dependencies": {
