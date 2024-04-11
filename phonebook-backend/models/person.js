@@ -1,16 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-mongoose.set('strictQuery', false);
-
-mongoose.connect(process.env.MONGODB_URI).then(() => {
-  //  eslint-disable-next-line
-  console.log('connected to MongoDB');
-}).catch((err) => {
-  //  eslint-disable-next-line
-  console.log('error connecting to MongoDB! ', err.message);
-});
-
 const phonebookSchema = new mongoose.Schema({
   name: {
     type: String,
